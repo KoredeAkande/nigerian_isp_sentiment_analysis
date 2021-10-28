@@ -3,12 +3,12 @@
 
 ## 1. Twitter Data Extraction Jupyter Notebook
 
-Code showing recent attempts at extracting ISP data from Twitter API. This has been unsuccessful thus far.
+Code showing early attempts at extracting ISP data from Twitter API. This has been unsuccessful as of Sept 14th, 2021.
 
 ### Challenges so far:
 - Inconsistencies in Twitter API documentation, resulting in usage of wrong parameters or wasted effort
 - API version restricts the radius which you can map around a point, thus changing my current strategy
-- Not all tweets return a coordinate, this might motivate a decision to pivot from my current idea if the issue cannot be resolved.
+- Not all tweets return a coordinate, this motivates my decision to pivot from my current idea of analyzing ISPs by local government areas (LGAs)
 
 
 ## 2. Nigerian ISP Sentiment Analysis Jupyter Notebook
