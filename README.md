@@ -68,7 +68,7 @@ Repository Organization
 Overview of Current Work Done
 ------------
 
-#### Code-Mixed Sentiment Analysis
+### Code-Mixed Sentiment Analysis
 Following the results of my initial sentiment analysis implementation that showed that consideration of Nigerian pidgin English is crucial for improved sentiment prediction for the extracted tweets, I conducted research on potential methods to model code-mixed data. 
 
 Based on [Muller et al.’s (2020)](http://pauillac.inria.fr/~seddah/Unseen_languages_Mbert.pdf) findings that Nigerian Pidgin English is an ‘easy’ language for an out-of-box Multilingual-BERT (M-BERT) to model, I conduct sentiment analysis on the Pidgin English tweets by fine-tuning an M-BERT model on a sample of Nigerian ISP tweets. To do so, the following steps were carried out:
@@ -81,7 +81,7 @@ Based on [Muller et al.’s (2020)](http://pauillac.inria.fr/~seddah/Unseen_lang
 
 After implementation, the M-BERT model was found to perform very poorly on predicting the minority class in our imbalanced dataset, motivating my exploration of various techniques to combat imbalance (see `TL;DR` above)
 
-#### Aspect-Based Sentiment Analysis (ABSA)
+### Aspect-Based Sentiment Analysis (ABSA)
 As a starting point to ABSA and annotating a dataset for more complex modeling, I am implementing a very simplified ABSA model/process as outlined below:
 1. List aspects (e.g. speed, price, reliability) determined from earlier data annotation phase
 2. Get nouns, adjectives, and adverbs from the tweets as these will likely be the parts of speech making meaningful reference to aspects
