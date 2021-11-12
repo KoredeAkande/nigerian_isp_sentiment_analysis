@@ -28,7 +28,6 @@ Repository Organization
 ------------
 
     ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
     ├── README.md          <- The top-level README for this project.
     ├── data
     │   ├── external       <- Data from third party sources.
