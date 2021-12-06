@@ -1,6 +1,4 @@
-ASPECTS = ['price','speed','reliability','coverage', 'customer service']
-
-def micro_precision_recall_fscore(true_aspects,aspect_preds, beta = 1):
+def binary_precision_recall_fscore(true_aspects,aspect_preds, beta = 1):
     
     """
     Function to compute the micro-averaged precision, recall and f-score based on the model's predicitions
@@ -39,7 +37,7 @@ def micro_precision_recall_fscore(true_aspects,aspect_preds, beta = 1):
     class_metrics = {}
     
     #Iterate through all the aspects
-    for aspect in aspects:
+    for aspect in ASPECTS:
         
         #Initialize counters for true positives, false positives and false negatives
         TP, FP, FN, TN = 0, 0, 0, 0
