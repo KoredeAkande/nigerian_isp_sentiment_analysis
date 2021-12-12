@@ -1,32 +1,14 @@
-def binary_precision_recall_fscore(true_aspects,aspect_preds, beta = 1):
+import numpy as np
+
+def weighted_binary_precision_recall_fscore(true_aspects,aspect_preds, beta = 1):
     
     """
-    Function to compute the micro-averaged precision, recall and f-score based on the model's predicitions
+    Function to compute the support-weighted precision, recall and f-score based on the model's predicitions
     
-    Formulas guided by:
-    
-        - MICRO-PRECISION:
-          Micro-precision on the Peltarion Platform. (2021). Micro-precision on the Peltarion Platform.
-          Retrieved from https://peltarion.com/knowledge-center/documentation/evaluation-view/classification-loss-metrics/micro-precision
-        
-        - MICRO-RECALL:
-          Micro-recall on the Peltarion Platform. (2021). Micro-recall on the Peltarion Platform.
-          Retrieved from https://peltarion.com/knowledge-center/documentation/evaluation-view/classification-loss-metrics/micro-recall
-          
-        - MICRO-F-SCORE:
-          Adapted from Micro F1-score on the Peltarion Platform. (2021). Micro F1-score on the Peltarion Platform. 
-          Retrieved from https://peltarion.com/knowledge-center/documentation/evaluation-view/classification-loss-metrics/micro-f1-score
-  
-    Inputs:
-        - true_aspects (pandas Series): True aspects for each tweet
-        - aspect_preds (pandas Series): Model's predicted aspects for each tweet
-        - beta (float): The strength of recall versus precision in the F-score
-        
-    Outputs:
-        - class metrics (dict): Dictionary of class-level metrics: false positive, true positive and precision
-        - micro_precision (float): Micro-averaged precision
-        - micro_recall (float): Micro-averaged recall
-        - micro_fscore (float): Micro-averaged f-measure score
+    Formulas guided by
+        - Jason Brownlee. (2020, February 23). A Gentle Introduction to the Fbeta-Measure for Machine Learning. 
+          Machine Learning Mastery. https://machinelearningmastery.com/fbeta-measure-for-machine-learning/
+
     """
     
     #Note the different aspect classes
@@ -69,9 +51,18 @@ def binary_precision_recall_fscore(true_aspects,aspect_preds, beta = 1):
                 #Record false positive
                 TN += 1
         
-        #Calculate class level precision and recall
-        precision = float(TP/(TP+FP))
-        recall = float(TP/(TP+FN))
+        #Calculate class level precision, recall, F1 and support
+        support = TP + FN
+        
+        try:
+            precision = float(TP/(TP+FP))
+        except ZeroDivisionError:
+            precision = 0
+            
+        try:
+            recall = float(TP/(TP+FN))
+        except ZeroDivisionError:
+            recall = 0
         
         #Calculate class level f score
         try:
@@ -82,39 +73,34 @@ def binary_precision_recall_fscore(true_aspects,aspect_preds, beta = 1):
         #Note down the final class-level metrics
         class_metrics[aspect] = {'TP':TP, 'FP':FP, 
                                  'FN': FN, 'TN':TN,
+                                 'Support': support,
                                  'Precision': precision, 
                                  'Recall': recall,
                                  f'F-{beta}': fscore}
                 
         
-    #COMPUTE MICRO-AVERAGED PRECISION, RECALL AND F-score
+    #COMPUTE WEIGHTED PRECISION, RECALL AND F-SCORE
     
     #Counters to track class aggregated metrics
-    TP_sum, FP_sum, FN_sum = 0, 0, 0
-     
+    weighted_precision, weighted_recall, weighted_fscore = 0,0,0
+    
+    #Compute support across all classes
+    total_support = sum([class_metrics[key]['Support'] for key in class_metrics.keys()])
+    
     #Iterate through all the classes
     for aspect_key in class_metrics.keys():
         
-        #Get the TP
-        TP_sum += class_metrics[aspect_key]['TP']
+        #Get the precision and weight by support
+        weighted_precision += class_metrics[aspect_key]['Precision'] * (class_metrics[aspect_key]['Support']/total_support)
         
-        #Get the FP
-        FP_sum += class_metrics[aspect_key]['FP']
+        #Get the recall and weight by support
+        weighted_recall += class_metrics[aspect_key]['Recall'] * (class_metrics[aspect_key]['Support']/total_support)
         
-        #Get the FN
-        FN_sum += class_metrics[aspect_key]['FN']
-        
-    #Micro-precision
-    micro_precision = TP_sum/(TP_sum + FP_sum)
+        #Get the precision and weight by support
+        weighted_fscore += class_metrics[aspect_key][f'F-{beta}'] * (class_metrics[aspect_key]['Support']/total_support)
     
-    #Micro recall
-    micro_recall = TP_sum/(TP_sum + FN_sum)
-    
-    #Micro F-Score
-    micro_fscore = ((1 + beta**2) * micro_precision * micro_recall)/(beta**2 * micro_precision + micro_recall)
-    
-    #Return class level metrics, micro-precision, micro-recall and micro-f measure
-    return class_metrics, micro_precision, micro_recall, micro_fscore
+    #Return class level metrics, weighted-precision, weighted-recall and weighted-f measure
+    return class_metrics, weighted_precision, weighted_recall, weighted_fscore
 
 
 def aspect_sentiment_accuracy(true_aspects,aspect_preds,true_sentiment,sentiment_preds):
@@ -122,6 +108,14 @@ def aspect_sentiment_accuracy(true_aspects,aspect_preds,true_sentiment,sentiment
     """
     Compute the micro and macro accuracy for the aspect sentiment predictions
     """
+    
+    import numpy as np
+    
+    #Ensure all the inputted values contain lists and not strings
+    true_aspects = true_aspects.apply(lambda x: eval(x) if isinstance(x,str) else x)
+    aspect_preds = aspect_preds.apply(lambda x: eval(x) if isinstance(x,str) else x)
+    true_sentiment = true_sentiment.apply(lambda x: eval(x) if isinstance(x,str) else x)
+    sentiment_preds = sentiment_preds.apply(lambda x: eval(x) if isinstance(x,str) else x)
     
     #Note the different aspect groups
     ASPECTS = ['price','speed','reliability','coverage', 'customer service']
@@ -144,11 +138,12 @@ def aspect_sentiment_accuracy(true_aspects,aspect_preds,true_sentiment,sentiment
             #If the predicted aspect is truly in the tweet
             if (aspect in aspect_preds[idx]) and (aspect in true_aspects[idx]):
                 
-                #Format the predicted list to a numpy array
+                #Convert to numpy array
                 model_preds = np.array(aspect_preds[idx]) #Model preds
                 
+                #Convert to numpy array
                 true_preds = np.array(true_aspects[idx]) #True preds
-                
+
                 #Find the corresponding sentiment of the correctly predicted aspect
                 #1. In model preds
                 sentiment_pred = sentiment_preds[idx][np.argwhere(model_preds == aspect)[0][0]]
