@@ -1,39 +1,63 @@
 Nigerian ISP Aspect-Based Sentiment Analysis
 ==============================
-This repository contains the data and code utilized in my undergraduate thesis, where I conduct an aspect-based sentiment analysis of Internet Service Providers in Lagos, Nigeria, using (code mixed) Twitter data. Skip to the `Repository Organization` below for an overview of the project structure.
-
-## TL; DR:
+This repository contains the data and code utilized in my undergraduate thesis, where I conduct an aspect-based sentiment analysis of Internet Service Providers in Lagos, Nigeria, using Twitter data. Skip to the `Repository Organization` below for an overview of the project structure.
 
 ### Sentiment Analysis
-Although a fine-tuned M-BERT results in an overall improvement in predictive performance (see table below) compared to a simplified NLP library, in Textblob, the model does a poorer job predicting the minority class in our imbalanced dataset compared to the Textblob. More specifically, the M-BERT scores 0% on recall, precision, and f1 for positive samples, compared to 44% in the Textblob implementation.
+Three models were experimented with for Nigerian Internet Service Providers' sentiment analysis, based on two factors: *Multilingualism* and *Proximity to Problem Domain (i.e. Twitter)*. The specific models fine-tuned (and their justification) include:
+- [BERTweet](https://huggingface.co/finiteautomata/bertweet-base-sentiment-analysis) (Proximity to Problem Domain)
+- [Multilingual-BERT](https://huggingface.co/bert-base-multilingual-cased) (Multilingualism)
+- [XLM-roBERTa-base](https://huggingface.co/cardiffnlp/twitter-xlm-roberta-base-sentiment) (Multilingualism & Proximity to Problem Domain)
 
-|               Metric               | M-BERT Implementation | Initial Sentiment Analysis Implementation (Textblob) |
-|:----------------------------------:|:---------------------:|:----------------------------------------------------:|
-| Precision (class-weighted average) |          68%          |                          58%                         |
-|   Recall (class-weighted average)  |          74%          |                          54%                         |
-|  F1 Score (class-weighted average) |          70%          |                          52%                         |
-|              Accuracy              |          74%          |                          54%                         |
+After experimenting with reweighting the loss function, increasing the batch size, and oversampling the minority to account for class imbalance, and experimenting with weight decay to address overfitting, the best checkpoints for the different models obtained the following validation results
 
-This highlights the importance of accounting for the imbalance in our modelling. Current strategies being explored include:
-- Reweighting the samples in the loss function to penalize more for positive samples misclassification `WIP`
-    - Here I am exploring reweighting the classes in the loss function using the Effective Number of Samples (ENS) strategy, which works well in cases of extreme class imbalance (Ishan Shrivastava, 2020)
-- Oversampling (or sampling with replacement) so that positive cases are more represented in the dataset
-- Trying other algorithms that are known to do well with imbalanced datasets (e.g. decision trees, random forests, etc.)
+|       Model      | Accuracy     | Precision | Recall |  F-1  |
+|:----------------:|:------------:|:---------:|:------:|:-----:|
+|      M-BERT      |   65.8%      |   59.8%   |  49.9% | 51.8% |
+|     BERTweet     |   **85.5%**  |   81.9%   |  **84.3%** | **83.0%** |
+| XLM-roBERTa-base |   82.9%      |   **87.3%**   |  72.4% | 77.0% |
+**Note:** All metrics above are macro-averaged
 
-### Aspect-Based Sentiment Analysis
-I am conducting a very simplified aspect-based sentiment analysis with the goal of having a starting point for annotating a dataset for a more complex aspect-modeling task. This adopts an unsupervised approach, leveraging the Aspect-based Sentiment Analysis package by ScalaConsultants. Specifically, aspect terms (e.g. fast and slow) anchored to a broader aspect (e.g. speed) are fed into the model and used to determine the sentiment of the broader aspect given the aspect term(s) exists in the tweet. More on the process is outlined below.
+### Aspect-Based Sentiment Analysis (ABSA)
+ABSA can be broken down into two subtasks: Aspect Extraction (AE) and Aspect Sentiment Classification (ASC)
+
+##### Aspect Extraction (AE)
+The aspect extraction subtask was framed as a multi-label classification problem. Hence, a single tweet can have multiple aspects (in our case multiple of price, speed, coverage, customer service, and reliability). To tackle the multilabel classification problem, three approaches were compared:
+
+1. POS Tagging with word similarity
+2. Multi-label classification with fine-tuned BERTweet model
+3. Binary relevance classification (using an independent BERTweet classifier for each aspect/label)
+
+F-0.5 score (which puts twice as much weight on precision than recall) was chosen as the key metric. The validation results obtained from these models are thus:
+
+|                        Model | Price F-0.5 | Speed F-0.5 | Reliability F-0.5 | Coverage F-0.5 | Customer service F-0.5 |
+|:-----------------------------:|:------------:|:------------:|:------------------:|:---------------:|:-----------------------:|
+| POS tagger + word similarity |        0.0% |       29.4% |              0.0% |           0.0% |                  17.9% |
+|             Binary relevance |       **44.1%** |       **73.2%** |             **79.4%** |          **85.4%** |                  **69.4%** |
+|         Multi-label BERTweet |       20.8% |       34.5% |              8.5% |          38.5% |                  65.8% |
+
+
+##### Aspect Sentiment Classification (ASC)
+Following the determination of the best aspect extraction model (Binary relevance), aspect sentiment classification was carried out using the [Aspect-based Sentiment Analysis](https://github.com/ScalaConsultants/Aspect-Based-Sentiment-Analysis) package by ScalaConsultants. The accuracy results for the different aspects is thus
+
+|          | Price | Speed | Reliability | Coverage | Customer Service |
+|:--------:|:-----:|:-----:|:-----------:|:--------:|:----------------:|
+| Accuracy | 16.7% | 66.7% |     100%    |   100%   |       100%       |
+
 
 
 Repository Organization
 ------------
 
     ├── LICENSE
-    ├── README.md          <- The top-level README for this project.
+    ├── README.md               <- The top-level README for this project.
     ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
+    │   ├── analogous-data      <- Data different but related to the Nigerian ISP domain
+    │   ├── interim             <- Intermediate data that has been transformed.
+    │   ├── processed           <- The final, canonical data sets for modeling.
+    │   ├── dataset-graveyard   <- Trash. Place to store work that is currently unimportant but could be useful
+    │   ├── model-evaluation    <- Datasets for evaluating the generated models
+    │   ├── model-generated     <- Datasets created by the models
+    │   └── raw                 <- The original, immutable data dump.
     │
     ├── models             <- Trained and serialized models, model predictions, or model summaries
     │
@@ -63,35 +87,6 @@ Repository Organization
         │
         └── visualization  <- Scripts to create exploratory and results oriented visualizations
             └── visualize.py
-    
-Overview of Current Work Done
-------------
-
-### Code-Mixed Sentiment Analysis
-Following the results of my initial sentiment analysis implementation that showed that consideration of Nigerian pidgin English is crucial for improved sentiment prediction for the extracted tweets, I conducted research on potential methods to model code-mixed data. 
-
-Based on [Muller et al.’s (2020)](http://pauillac.inria.fr/~seddah/Unseen_languages_Mbert.pdf) findings that Nigerian Pidgin English is an ‘easy’ language for an out-of-box Multilingual-BERT (M-BERT) to model, I conduct sentiment analysis on the Pidgin English tweets by fine-tuning an M-BERT model on a sample of Nigerian ISP tweets. To do so, the following steps were carried out:
-- Extracted data from Twitter API on Nigerian ISPs
-- Merged the extracted data and shuffled (to ensure representativeness)
-- Drew a random sample from the data, corresponding to about a quarter of the merged dataset. This sample will be split and used for fine-tuning the model
-- The sample (of tweets) was annotated (per self-developed guidelines) in Label Studio, classifying tweets into positive, negative, or neutral sentiment categories.
-- All the extracted data (including those in the sample) were cleaned and sentiment groups (where present) were encoded
-- Finally, the cleaned and encoded sample was split into training, validation, and test sets for modeling with an M-BERT
-
-After implementation, the M-BERT model was found to perform very poorly on predicting the minority class in our imbalanced dataset, motivating my exploration of various techniques to combat imbalance (see `TL;DR` above)
-
-### Aspect-Based Sentiment Analysis (ABSA)
-As a starting point to ABSA and annotating a dataset for more complex modeling, I am implementing a very simplified ABSA model/process as outlined below:
-1. List aspects (e.g. speed, price, reliability) determined from earlier data annotation phase
-2. Get nouns, adjectives, and adverbs from the tweets as these will likely be the parts of speech making meaningful reference to aspects
-3. Check if each of the words from step 2 is very similar to any of the aspects (e.g. speed [aspect] and fast [word in tweet]) by computing the similarity score
-4. If the similarity score is passed a set threshold, we assume the aspect was referenced in the tweet. Hence, note down that the aspect was referenced in that given tweet and also note down the word (herein called aspect-implying word) that implied the aspect
-5. Conduct ABSA using the ABSA package with the tweet and with the aspect-implying word and note sentiment (positive, negative or neutral) towards the main aspect (price, speed, etc.)
-6. If multiple words make reference to a single aspect, find the average of their sentiments and use to assign a single sentiment
-
-
-
-
 --------
 
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
