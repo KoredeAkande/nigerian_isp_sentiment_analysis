@@ -1,6 +1,6 @@
 Nigerian ISP Aspect-Based Sentiment Analysis
 ==============================
-This repository contains the data and code utilized in my undergraduate thesis, where I conduct an aspect-based sentiment analysis of Internet Service Providers in Lagos, Nigeria, using Twitter data. Skip to the `Repository Organization` below for an overview of the project structure.
+This repository contains the data and code utilized in my undergraduate thesis, where I conduct an aspect-based sentiment analysis of Internet Service Providers in Lagos, Nigeria, using Twitter data. The project culminates in a [Tableau dashboard](https://public.tableau.com/app/profile/korede.akande/viz/SpectranetDashboard/Spectranet?publish=yes) to inform understanding of customers and facilitate strategic decision making. Skip to the `Repository Organization` below for an overview of the project structure.
 
 ### Sentiment Analysis
 Three models were experimented with for Nigerian Internet Service Providers' sentiment analysis, based on two factors: *Multilingualism* and *Proximity to Problem Domain (i.e. Twitter)*. The specific models fine-tuned (and their justification) include:
