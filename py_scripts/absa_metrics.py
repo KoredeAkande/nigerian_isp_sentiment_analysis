@@ -123,6 +123,9 @@ def aspect_sentiment_accuracy(true_aspects,aspect_preds,true_sentiment,sentiment
     #Dictionary to note the sentiment prediction accuracy for the different aspects
     aspect_accuracy = {}
     
+    #Dictionary to note the number of correctly extracted tweets on the aspect
+    aspect_extraction_support = {'price':0,'speed':0,'reliability':0,'coverage':0, 'customer service':0}
+    
     #Track the number of correct preds and total preds across all the classes
     global_correct_preds, global_total_preds = 0, 0
     
@@ -137,6 +140,9 @@ def aspect_sentiment_accuracy(true_aspects,aspect_preds,true_sentiment,sentiment
             
             #If the predicted aspect is truly in the tweet
             if (aspect in aspect_preds[idx]) and (aspect in true_aspects[idx]):
+                
+                #Note that an instance of the aspect was correctly extracted
+                aspect_extraction_support[aspect] += 1
                 
                 #Convert to numpy array
                 model_preds = np.array(aspect_preds[idx]) #Model preds
@@ -178,5 +184,5 @@ def aspect_sentiment_accuracy(true_aspects,aspect_preds,true_sentiment,sentiment
     macro_accuracy = np.mean([aspect_accuracy[aspect] for aspect in aspect_accuracy.keys() if isinstance(aspect_accuracy[aspect],float)])
     
     #Return class level metrics, micro-accuracy, and macro accuracy
-    return aspect_accuracy, micro_accuracy, macro_accuracy
+    return aspect_accuracy, micro_accuracy, macro_accuracy, aspect_extraction_support
     
