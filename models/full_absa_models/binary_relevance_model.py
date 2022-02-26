@@ -16,17 +16,23 @@ import aspect_based_sentiment_analysis as absa
 #Load BerTweet tokenizer
 TOKENIZER = AutoTokenizer.from_pretrained("vinai/bertweet-base", normalization=True)
 
+#Load the tokenizer for the speed model
+SPEED_TOKENIZER = AutoTokenizer.from_pretrained("vinai/bertweet-base", normalization=True)
+
+#Add the relevant speed-related tokens, so tokenizer does not split these
+SPEED_TOKENIZER.add_tokens(['mbps','mb/s','kbps','kb/s','gbps','gb/s'])
+
 
 #Load the best models from finetuning 
 reliability_model = AutoModelForSequenceClassification.from_pretrained("../models/absa-aspect-extraction/ensemble_model/reliability_classifier/checkpoint-130")
 
-coverage_model = AutoModelForSequenceClassification.from_pretrained("../models/absa-aspect-extraction/ensemble_model/coverage_classifier/checkpoint-140")
+coverage_model = AutoModelForSequenceClassification.from_pretrained("../models/absa-aspect-extraction/ensemble_model/coverage_classifier/checkpoint-150")
 
-price_model = AutoModelForSequenceClassification.from_pretrained("../models/absa-aspect-extraction/ensemble_model/price_classifier/checkpoint-110")
+price_model = AutoModelForSequenceClassification.from_pretrained("../models/absa-aspect-extraction/ensemble_model/price_classifier/checkpoint-90")
 
 speed_model = AutoModelForSequenceClassification.from_pretrained("../models/absa-aspect-extraction/ensemble_model/speed_classifier/checkpoint-150")
 
-customer_service_model = AutoModelForSequenceClassification.from_pretrained("../models/absa-aspect-extraction/ensemble_model/customer_service_classifier/checkpoint-60")
+customer_service_model = AutoModelForSequenceClassification.from_pretrained("../models/absa-aspect-extraction/ensemble_model/customer_service_classifier/checkpoint-140")
 
 #Load the ABSA sentiment model
 nlp = absa.load()
@@ -51,11 +57,11 @@ def run(df, col_name):
     df_list = []
     
     #List containing the binary classifiers
-    binary_classifiers = [('reliability',reliability_model),
-                          ('price',price_model),
-                          ('speed',speed_model),
-                          ('coverage',coverage_model),
-                          ('customer service', customer_service_model)]
+    binary_classifiers = [('reliability',reliability_model,TOKENIZER),
+                          ('price',price_model,TOKENIZER),
+                          ('speed',speed_model,SPEED_TOKENIZER),
+                          ('coverage',coverage_model,TOKENIZER),
+                          ('customer service', customer_service_model,TOKENIZER)]
     
     #Iterate through all the tweets
     for tweet in df[col_name]:
@@ -66,19 +72,19 @@ def run(df, col_name):
         #List to store the sentiment values (Positive, Negative or Neutral) for the aspects
         detected_sentiments = []
         
-        #Encode the tweet
-        encoding = TOKENIZER.encode_plus(
-            tweet,
-            add_special_tokens=True,
-            max_length=TOKENIZER.model_max_length,
-            return_token_type_ids=False,
-            padding="max_length",
-            return_attention_mask=True,
-            return_tensors='pt'
-        )
-        
         #Iterate through each of the binary classifiers
-        for aspect,classifier in binary_classifiers:
+        for aspect,classifier,tokenizer in binary_classifiers:
+            
+            #Encode the tweet
+            encoding = tokenizer.encode_plus(
+                tweet,
+                add_special_tokens=True,
+                max_length=TOKENIZER.model_max_length,
+                return_token_type_ids=False,
+                padding="max_length",
+                return_attention_mask=True,
+                return_tensors='pt'
+            )
             
             #Run each binary classifier on the tweet
             aspect_prediction = classifier(encoding["input_ids"], encoding["attention_mask"])
