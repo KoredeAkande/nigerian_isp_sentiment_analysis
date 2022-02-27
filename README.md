@@ -1,6 +1,6 @@
 Nigerian ISP Aspect-Based Sentiment Analysis
 ==============================
-This repository contains the data and code utilized in my undergraduate thesis, where I conduct an aspect-based sentiment analysis of Internet Service Providers in Lagos, Nigeria, using Twitter data. The project culminates in a [Tableau dashboard](https://public.tableau.com/app/profile/korede.akande/viz/SpectranetDashboard/Spectranet?publish=yes) to inform understanding of customers and facilitate strategic decision making. Skip to the `Repository Organization` below for an overview of the project structure.
+This repository contains the data and code utilized in my undergraduate thesis, where I conduct an aspect-based sentiment analysis of Internet Service Providers in Lagos, Nigeria, using Twitter data. The project culminates in a [Tableau dashboard](https://public.tableau.com/app/profile/korede.akande/viz/SpectranetDashboardV2/Spectranet?publish=yes) to inform understanding of customers and facilitate strategic decision making. Skip to the `Repository Organization` below for an overview of the project structure.
 
 ### Sentiment Analysis
 Three models were experimented with for Nigerian Internet Service Providers' sentiment analysis, based on two factors: *Multilingualism* and *Proximity to Problem Domain (i.e. Twitter)*. The specific models fine-tuned (and their justification) include:
@@ -32,7 +32,7 @@ F-0.5 score (which puts twice as much weight on precision than recall) was chose
 |                        Model | Price F-0.5 | Speed F-0.5 | Reliability F-0.5 | Coverage F-0.5 | Customer service F-0.5 |
 |:-----------------------------:|:------------:|:------------:|:------------------:|:---------------:|:-----------------------:|
 | POS tagger + word similarity |        0.0% |       29.4% |              0.0% |           0.0% |                  17.9% |
-|             Binary relevance |       **44.1%** |       **73.2%** |             **79.4%** |          **85.4%** |                  **69.4%** |
+|             Binary relevance |       **80.4%** |       **84.6%** |             **79.4%** |          **85.4%** |                  **69.4%** |
 |         Multi-label BERTweet |       20.8% |       34.5% |              8.5% |          38.5% |                  65.8% |
 
 
@@ -41,7 +41,7 @@ Following the determination of the best aspect extraction model (Binary relevanc
 
 |          | Price | Speed | Reliability | Coverage | Customer Service |
 |:--------:|:-----:|:-----:|:-----------:|:--------:|:----------------:|
-| Accuracy | 16.7% | 66.7% |     100%    |   100%   |       100%       |
+| Accuracy | 22.2% | 63.6% |     100%    |   100%   |       90.9%       |
 
 
 
