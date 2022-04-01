@@ -32,7 +32,7 @@ F-0.5 score (which puts twice as much weight on precision than recall) was chose
 |                        Model | Price F-0.5 | Speed F-0.5 | Reliability F-0.5 | Coverage F-0.5 | Customer service F-0.5 |
 |:-----------------------------:|:------------:|:------------:|:------------------:|:---------------:|:-----------------------:|
 | POS tagger + word similarity |        0.0% |       29.4% |              0.0% |           0.0% |                  17.9% |
-|             Binary relevance |       **80.4%** |       **84.6%** |             **79.4%** |          **85.4%** |                  **69.4%** |
+|             Binary relevance |       **80.4%** |       **84.6%** |             **79.4%** |          **85.4%** |                  **78.8%** |
 |         Multi-label BERTweet |       20.8% |       34.5% |              8.5% |          38.5% |                  65.8% |
 
 
