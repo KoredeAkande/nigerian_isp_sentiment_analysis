@@ -90,5 +90,5 @@ target/
 
 #Exclude Twitter credentials files
 /src/credentials/alt_twitter_credentials.py
-/src/twitter_credentials.py
+/src/credentials/twitter_credentials.py
 /notebooks/test-version/twitter_credentials.py
