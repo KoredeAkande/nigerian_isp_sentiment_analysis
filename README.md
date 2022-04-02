@@ -48,7 +48,9 @@ Following the determination of the best aspect extraction model (Binary relevanc
 
 Installation & Quick Start
 ------------
-1. Download the `best-checkpoints` [folder](https://drive.google.com/drive/folders/1ckFSG45S96NPXn_EEnvR9DyG51cSg_Ek?usp=sharing), rename `ensemble_model` and place inside `models/absa-aspect-extraction` folder. Note: The folder is large!
+1. Download the models
+- **Sentiment analysis model:** Download the [checkpoint](https://drive.google.com/drive/folders/11CJV9Zv5IVJuLQXRZUIRLf1gZshmCNY1?usp=sharing) and place inside `models/bertweet/baseline-bertweet`.
+- **ABSA models:** Download the `best-checkpoints` [folder](https://drive.google.com/drive/folders/1ckFSG45S96NPXn_EEnvR9DyG51cSg_Ek?usp=sharing), rename it `ensemble_model` and place inside `models/absa-aspect-extraction` folder. Note: The folder is large!
 2. Install requirements
 
 ```
